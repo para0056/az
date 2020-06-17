@@ -27,6 +27,11 @@ variable "vnet_rg_name" {
     description = "Name of the Networking Resource Group"
 }
 
+variable "subnet_cidr" {
+  type = list(string)
+  description = "CIDR block for Bastion subnet"
+}
+
 variable "proxy_ip" {
     type = string
     description = "Public IP of the CRA proxy"
