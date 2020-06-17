@@ -2,6 +2,10 @@ variable "location" {
   type    = string
   default = "canadacentral"
 }
+variable "bastion_rg_name" {
+  type = string
+  description = "Name of the Resource Group where the Bastion hose will reside"
+}
 
 variable "bastion_name" {
   type        = string
@@ -23,6 +27,10 @@ variable "vnet_rg_name" {
     description = "Name of the Networking Resource Group"
 }
 
-variable "subnet_names" {
-  type = list(string)
+variable "proxy_ip" {
+    type = string
+    description = "Public IP of the CRA proxy"
 }
+# variable "subnet_names" {
+#   type = list(string)
+# }
