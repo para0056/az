@@ -64,7 +64,7 @@ resource "azurerm_subnet" "bastion" {
   virtual_network_name = "Dev-vnet"
   resource_group_name = var.vnet_rg_name
 
-  address_prefix = "100.96.129.0/27"
+  address_prefix = "var.subnet_cidr"
 
 }
 
