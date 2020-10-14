@@ -28,14 +28,16 @@ variable "vnet_rg_name" {
 }
 
 variable "subnet_cidr" {
-  type = list(string)
+  type = string
   description = "CIDR block for Bastion subnet"
+}
+
+variable "subnet_name" {
+  type = string
+  description = "Name of the Bastion subnet"
 }
 
 variable "proxy_ip" {
     type = string
     description = "Public IP of the CRA proxy"
 }
-# variable "subnet_names" {
-#   type = list(string)
-# }

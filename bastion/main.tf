@@ -21,7 +21,7 @@ resource "azurerm_network_security_group" "main" {
     }
 
   security_rule {
-    name = "allow-inbound-rcnet-443"
+    name = "allow-inbound-443"
     priority = 1010
     direction = "Inbound"
     access = "Allow"
@@ -61,10 +61,10 @@ resource "azurerm_network_security_group" "main" {
 # Create subnet for Bastion
 resource "azurerm_subnet" "bastion" {
   name = "AzureBastionSubnet"
-  virtual_network_name = "Dev-vnet"
-  resource_group_name = var.vnet_rg_name
+  virtual_network_name = var.vnet_name
+  resource_group_name = var.bastion_rg_name
 
-  address_prefix = "var.subnet_cidr"
+  address_prefix = var.subnet_cidr
 
 }
 
@@ -77,7 +77,7 @@ resource "azurerm_subnet_network_security_group_association" "main" {
 resource "azurerm_public_ip" "main" {
   name                = var.pip_name
   location            = var.location
-  resource_group_name = azurerm_resource_group.main.name
+  resource_group_name = var.bastion_rg_name
   allocation_method   = "Static"
   sku                 = "Standard"
 }
@@ -87,7 +87,7 @@ resource "azurerm_bastion_host" "main" {
 
     name    = var.bastion_name
     location = var.location
-    resource_group_name = azurerm_resource_group.main.name
+    resource_group_name = var.bastion_rg_name
 
     ip_configuration {
         name = "configuration"
