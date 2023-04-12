@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "netrg" {
-    name     = "rg-net"
-    location = var.deploy_location
+  name     = "rg-net"
+  location = var.deploy_location
 }
 
 resource "azurerm_virtual_network" "main" {
@@ -13,7 +13,7 @@ resource "azurerm_virtual_network" "main" {
 
 resource "azurerm_subnet" "vdi" {
   name                 = "snet-vdi"
-  resource_group_name  = var.rg_name
+  resource_group_name  = azurerm_resource_group.netrg.name
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = var.subnet_range
   depends_on           = [azurerm_resource_group.netrg]
