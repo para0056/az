@@ -1,3 +1,11 @@
+variable "resource_tags" {
+  description = "Tags to set for all resources"
+  type        = map(string)
+  default = {
+    environment = "dev",
+    source      = "terraform"
+  }
+}
 variable "resource_group_location" {
   description = "Location of the resource group."
 }
@@ -28,4 +36,8 @@ variable "local_admin_username" {
 variable "key_vault_soft_delete_retention" {
   type    = string
   default = 7
+}
+
+variable "avd_user_upn" {
+  type = string
 }

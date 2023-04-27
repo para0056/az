@@ -5,6 +5,8 @@ resource "azurerm_virtual_desktop_workspace" "workspace" {
   location            = azurerm_resource_group.main.location
   friendly_name       = "${var.prefix} Workspace"
   description         = "${var.prefix} Workspace"
+
+  tags = var.resource_tags
 }
 
 # Create AVD host pool
@@ -25,6 +27,10 @@ resource "azurerm_virtual_desktop_host_pool" "hostpool" {
       day_of_week = "Wednesday"
       hour_of_day = 2
     }
+  }
+
+  lifecycle {
+    ignore_changes = [custom_rdp_properties]
   }
 }
 
@@ -48,12 +54,14 @@ resource "azurerm_virtual_desktop_application_group" "dag" {
   description         = "AVD application group"
   depends_on          = [azurerm_virtual_desktop_host_pool.hostpool, azurerm_virtual_desktop_workspace.workspace]
 
+  tags = var.resource_tags
 }
 
 # Associate Workspace and DAG
 resource "azurerm_virtual_desktop_workspace_application_group_association" "ws-dag" {
   application_group_id = azurerm_virtual_desktop_application_group.dag.id
   workspace_id         = azurerm_virtual_desktop_workspace.workspace.id
+
 }
 
 locals {
@@ -77,6 +85,8 @@ resource "azurerm_network_interface" "avd_vm_nic" {
     subnet_id                     = data.azurerm_subnet.main.id
     private_ip_address_allocation = "Dynamic"
   }
+
+  tags = var.resource_tags
 }
 
 resource "azurerm_windows_virtual_machine" "avd_vm" {
@@ -103,6 +113,8 @@ resource "azurerm_windows_virtual_machine" "avd_vm" {
     sku       = "win11-22h2-avd"
     version   = "latest"
   }
+
+  tags = var.resource_tags
 }
 
 resource "azurerm_virtual_machine_extension" "vmext_dsc" {

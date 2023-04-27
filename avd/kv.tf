@@ -17,6 +17,9 @@ resource "azurerm_key_vault" "main" {
     ip_rules                   = ["0.0.0.0/0"]
     virtual_network_subnet_ids = null
   }
+
+  tags = var.resource_tags
+
 }
 resource "azurerm_key_vault_secret" "main" {
   name         = "avd-local-admin"
