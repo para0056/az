@@ -14,16 +14,27 @@ resource "azurerm_virtual_desktop_host_pool" "hostpool" {
   name                     = "${var.prefix}-hp"
   friendly_name            = "${var.prefix} Host Pool"
   validate_environment     = true
-  custom_rdp_properties    = "audiocapturemode:i:1;audiomode:i:0;targetisaadjoined:i:1"
+  custom_rdp_properties    = "drivestoredirect:s:*;audiomode:i:0;videoplaybackmode:i:1;redirectclipboard:i:1;redirectprinters:i:1;devicestoredirect:s:*;redirectcomports:i:1;redirectsmartcards:i:1;usbdevicestoredirect:s:*;enablecredsspsupport:i:1;redirectwebauthn:i:1;use multimon:i:1"
   description              = "${var.prefix} Terraform HostPool"
   type                     = "Pooled"
   maximum_sessions_allowed = 1
   load_balancer_type       = "DepthFirst" #[BreadthFirst DepthFirst]
+  scheduled_agent_updates {
+    enabled = true
+    schedule {
+      day_of_week = "Wednesday"
+      hour_of_day = 2
+    }
+  }
+}
+
+resource "time_rotating" "main" {
+  rotation_days = 29
 }
 
 resource "azurerm_virtual_desktop_host_pool_registration_info" "registrationinfo" {
   hostpool_id     = azurerm_virtual_desktop_host_pool.hostpool.id
-  expiration_date = var.rfc3339
+  expiration_date = time_rotating.main.rotation_rfc3339
 }
 
 # Create AVD DAG
@@ -36,6 +47,7 @@ resource "azurerm_virtual_desktop_application_group" "dag" {
   friendly_name       = "Desktop AppGroup"
   description         = "AVD application group"
   depends_on          = [azurerm_virtual_desktop_host_pool.hostpool, azurerm_virtual_desktop_workspace.workspace]
+
 }
 
 # Associate Workspace and DAG
@@ -76,7 +88,9 @@ resource "azurerm_windows_virtual_machine" "avd_vm" {
   provision_vm_agent    = true
   admin_username        = var.local_admin_username
   admin_password        = random_string.AVD_local_password.result
-
+  identity {
+    type = "SystemAssigned"
+  }
   os_disk {
     name                 = "disk1"
     caching              = "ReadWrite"
@@ -104,7 +118,8 @@ resource "azurerm_virtual_machine_extension" "vmext_dsc" {
       "modulesUrl": "https://wvdportalstorageblob.blob.core.windows.net/galleryartifacts/Configuration_09-08-2022.zip",
       "configurationFunction": "Configuration.ps1\\AddSessionHost",
       "properties": {
-        "HostPoolName":"${azurerm_virtual_desktop_host_pool.hostpool.name}"
+        "HostPoolName":"${azurerm_virtual_desktop_host_pool.hostpool.name}",
+        "aadJoin": true
       }
     }
 SETTINGS
@@ -120,4 +135,22 @@ PROTECTED_SETTINGS
   depends_on = [
     azurerm_virtual_desktop_host_pool.hostpool
   ]
+
+  lifecycle {
+    ignore_changes = [settings, protected_settings]
+  }
 }
+
+resource "azurerm_virtual_machine_extension" "aad-join" {
+
+  name                       = "AADLoginForWindows"
+  virtual_machine_id         = azurerm_windows_virtual_machine.avd_vm.id
+  publisher                  = "Microsoft.Azure.ActiveDirectory"
+  type                       = "AADLoginForWindows"
+  type_handler_version       = "1.0"
+  auto_upgrade_minor_version = true
+  depends_on = [
+    azurerm_virtual_machine_extension.vmext_dsc
+  ]
+}
+
