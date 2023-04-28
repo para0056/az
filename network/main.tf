@@ -1,8 +1,10 @@
+# Create Resource Group for resources
 resource "azurerm_resource_group" "netrg" {
   name     = "rg-net"
   location = var.deploy_location
 }
 
+# Create VNet
 resource "azurerm_virtual_network" "main" {
   name                = "vnet-${var.prefix}"
   address_space       = var.vnet_range
@@ -11,6 +13,7 @@ resource "azurerm_virtual_network" "main" {
   depends_on          = [azurerm_resource_group.netrg]
 }
 
+# Create subnet for AVD/VDI
 resource "azurerm_subnet" "vdi" {
   name                 = "snet-vdi"
   resource_group_name  = azurerm_resource_group.netrg.name
@@ -19,6 +22,7 @@ resource "azurerm_subnet" "vdi" {
   depends_on           = [azurerm_resource_group.netrg]
 }
 
+# Create NSG for AVD/VDI VMs
 resource "azurerm_network_security_group" "vdi" {
   name                = "nsg-${var.prefix}"
   location            = var.deploy_location
@@ -37,6 +41,7 @@ resource "azurerm_network_security_group" "vdi" {
   depends_on = [azurerm_resource_group.netrg]
 }
 
+# Associate NSG with Subnet
 resource "azurerm_subnet_network_security_group_association" "vdi" {
   subnet_id                 = azurerm_subnet.vdi.id
   network_security_group_id = azurerm_network_security_group.vdi.id

@@ -1,16 +1,19 @@
 data "azurerm_subscription" "current" {}
 
+# Create Resource Group for resources
 resource "azurerm_resource_group" "main" {
   name     = var.rg_name
   location = var.resource_group_location
 }
+
+# Create Action Group 
 resource "azurerm_monitor_action_group" "main" {
   name                = "budget-action-group"
   resource_group_name = azurerm_resource_group.main.name
   short_name          = "budgetag"
 }
 
-
+# Create montly budget with notification emails
 resource "azurerm_consumption_budget_subscription" "main" {
   name            = "default-budget"
   subscription_id = data.azurerm_subscription.current.id
@@ -50,4 +53,4 @@ resource "azurerm_consumption_budget_subscription" "main" {
       "nick+az@nparadis.ca",
     ]
   }
-  }
+}

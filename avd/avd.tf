@@ -34,16 +34,18 @@ resource "azurerm_virtual_desktop_host_pool" "hostpool" {
   }
 }
 
+# Used to get current date + 29 days
 resource "time_rotating" "main" {
   rotation_days = 29
 }
 
+# Create Registration Info and set to expire 29 days from current date
 resource "azurerm_virtual_desktop_host_pool_registration_info" "registrationinfo" {
   hostpool_id     = azurerm_virtual_desktop_host_pool.hostpool.id
   expiration_date = time_rotating.main.rotation_rfc3339
 }
 
-# Create AVD DAG
+# Create AVD Desktop Application Group
 resource "azurerm_virtual_desktop_application_group" "dag" {
   resource_group_name = azurerm_resource_group.main.name
   host_pool_id        = azurerm_virtual_desktop_host_pool.hostpool.id
@@ -68,6 +70,7 @@ locals {
   registration_token = azurerm_virtual_desktop_host_pool_registration_info.registrationinfo.token
 }
 
+# Generate random password for local admin password
 resource "random_string" "AVD_local_password" {
   length           = 16
   special          = true
@@ -75,6 +78,7 @@ resource "random_string" "AVD_local_password" {
   override_special = "*!@#?"
 }
 
+# Create NIC and place in AVD subnet
 resource "azurerm_network_interface" "avd_vm_nic" {
   name                = "${var.prefix}-nic"
   resource_group_name = azurerm_resource_group.main.name
@@ -89,6 +93,7 @@ resource "azurerm_network_interface" "avd_vm_nic" {
   tags = var.resource_tags
 }
 
+# Create Windows 11 VM
 resource "azurerm_windows_virtual_machine" "avd_vm" {
   name                  = "vm-${var.prefix}"
   resource_group_name   = azurerm_resource_group.main.name
@@ -118,6 +123,7 @@ resource "azurerm_windows_virtual_machine" "avd_vm" {
   tags = var.resource_tags
 }
 
+# Add AVD agent and configure to join the host pool
 resource "azurerm_virtual_machine_extension" "vmext_dsc" {
   name                       = "${var.prefix}-avd_dsc"
   virtual_machine_id         = azurerm_windows_virtual_machine.avd_vm.id
@@ -154,6 +160,7 @@ PROTECTED_SETTINGS
   }
 }
 
+# Automatically join VM to Azure AD
 resource "azurerm_virtual_machine_extension" "aad-join" {
 
   name                       = "AADLoginForWindows"

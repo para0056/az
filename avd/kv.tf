@@ -1,3 +1,4 @@
+# Create basic Key Vault 
 resource "azurerm_key_vault" "main" {
   name                = "kv-para0056-${var.prefix}"
   resource_group_name = azurerm_resource_group.main.name
@@ -21,6 +22,8 @@ resource "azurerm_key_vault" "main" {
   tags = var.resource_tags
 
 }
+
+# Store VM Admin password as secret
 resource "azurerm_key_vault_secret" "main" {
   name         = "avd-local-admin"
   value        = random_string.AVD_local_password.result
@@ -30,6 +33,7 @@ resource "azurerm_key_vault_secret" "main" {
   ]
 }
 
+# Allow SPN to get the secret
 resource "azurerm_key_vault_access_policy" "main" {
   key_vault_id = azurerm_key_vault.main.id
   tenant_id    = data.azurerm_client_config.current.tenant_id

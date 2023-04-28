@@ -5,6 +5,8 @@ resource "azurerm_resource_group" "main" {
 
   tags = var.resource_tags
 }
+
+# Create NSG for the Bastion Host
 resource "azurerm_network_security_group" "main" {
   name                = "nsg-${var.prefix}"
   location            = var.location
@@ -71,12 +73,13 @@ resource "azurerm_subnet" "bastion" {
   address_prefixes = var.subnet_cidr
 }
 
+# Associate NSG with Bastion Subnet
 resource "azurerm_subnet_network_security_group_association" "main" {
   subnet_id                 = azurerm_subnet.bastion.id
   network_security_group_id = azurerm_network_security_group.main.id
 }
 
-# Create Pubblic IP to be used by Bastion
+# Create Public IP to be used by Bastion
 resource "azurerm_public_ip" "main" {
   name                = "pip-${var.prefix}"
   location            = var.location
@@ -88,7 +91,7 @@ resource "azurerm_public_ip" "main" {
 
 }
 
-# Creates Bastion Host
+# Create Bastion Host
 resource "azurerm_bastion_host" "main" {
 
   name                = var.prefix
