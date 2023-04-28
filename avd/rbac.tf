@@ -1,6 +1,6 @@
 # Create AAD Group
 resource "azuread_group" "avd_user_group" {
-  display_name     = "avd_user_group"
+  display_name     = var.avd_user_group_name
   security_enabled = true
 }
 
@@ -11,7 +11,7 @@ resource "azurerm_role_assignment" "avd_users_assignment" {
   principal_id       = azuread_group.avd_user_group.id
 
   lifecycle {
-    ignore_changes = [ role_definition_id ]
+    ignore_changes = [role_definition_id]
   }
 }
 

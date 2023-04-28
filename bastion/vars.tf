@@ -30,6 +30,10 @@ variable "subnet_cidr" {
   description = "CIDR block for Bastion subnet"
 }
 
+variable "bastion_snet_name" {
+  type = string
+}
+
 variable "source_ip" {
   type        = string
   description = "Public IP to allow"

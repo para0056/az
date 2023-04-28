@@ -35,3 +35,7 @@ variable "key_vault_soft_delete_retention" {
 variable "avd_user_upn" {
   type = string
 }
+
+variable "avd_user_group_name" {
+  type = string
+}
