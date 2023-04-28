@@ -98,6 +98,7 @@ resource "azurerm_windows_virtual_machine" "avd_vm" {
   provision_vm_agent    = true
   admin_username        = var.local_admin_username
   admin_password        = random_string.AVD_local_password.result
+  boot_diagnostics {}
   identity {
     type = "SystemAssigned"
   }
