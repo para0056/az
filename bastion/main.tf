@@ -28,7 +28,7 @@ resource "azurerm_network_security_group" "main" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
-    source_address_prefix      = var.proxy_ip
+    source_address_prefix      = var.source_ip
     source_port_range          = "*"
     destination_address_prefix = "*"
     destination_port_range     = "443"
@@ -91,7 +91,7 @@ resource "azurerm_public_ip" "main" {
 # Creates Bastion Host
 resource "azurerm_bastion_host" "main" {
 
-  name                = "bastion-${var.prefix}"
+  name                = var.prefix
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
