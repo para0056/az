@@ -21,13 +21,7 @@ resource "azurerm_virtual_desktop_host_pool" "hostpool" {
   type                     = "Pooled"
   maximum_sessions_allowed = 1
   load_balancer_type       = "DepthFirst" #[BreadthFirst DepthFirst]
-  scheduled_agent_updates {
-    enabled = true
-    schedule {
-      day_of_week = "Wednesday"
-      hour_of_day = 2
-    }
-  }
+  start_vm_on_connect      = true
 
   lifecycle {
     ignore_changes = [custom_rdp_properties]
