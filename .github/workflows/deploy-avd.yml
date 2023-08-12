@@ -1,0 +1,40 @@
+name: Terraform Deployment of AVD
+
+on:
+  push:
+    branches:
+      - master  # Change to your main branch name
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.0.0  # Specify the desired Terraform version
+
+    - name: Set up Azure CLI
+      uses: azure/setup-azure-cli@v1
+
+    - name: Login to Azure
+      run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+    - name: Select Azure Subscription
+      run: az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Change dir
+      run: cd avd
+
+    - name: Initialize Terraform
+      run: terraform init
+
+    - name: Plan Terraform Deployment
+      run: terraform plan
+
+    - name: Apply Terraform Changes
+      run: terraform apply -auto-approve
