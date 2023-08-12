@@ -7,6 +7,11 @@ on:
 
 jobs:
   deploy:
+    env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
     runs-on: ubuntu-latest
 
     steps:
@@ -14,18 +19,17 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.0.0  # Specify the desired Terraform version
+      uses: hashicorp/setup-terraform@v2
+
 
     - name: Set up Azure CLI
       uses: azure/setup-azure-cli@v1
 
-    - name: Login to Azure
-      run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+    # - name: Login to Azure
+    #   run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-    - name: Select Azure Subscription
-      run: az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    # - name: Select Azure Subscription
+    #   run: az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Change dir
       run: cd avd
@@ -36,5 +40,5 @@ jobs:
     - name: Plan Terraform Deployment
       run: terraform plan
 
-    - name: Apply Terraform Changes
-      run: terraform apply -auto-approve
+    # - name: Apply Terraform Changes
+    #   run: terraform apply -auto-approve
